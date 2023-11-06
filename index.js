@@ -2,9 +2,9 @@ var express = require('express');
 var mysql = require('mysql');
 
 var connection = mysql.createConnection({
-  host     : '172.17.0.3',
+  host     : '127.0.0.1',
   user     : 'root',
-  password : 'root'
+  password : ''
 });
 
 connection.connect();
@@ -14,44 +14,50 @@ app.use(express.json());
 app.use('/', express.static('public'));
 
 app.post('/data', function (req, res) {
-	var fecha=req.body.fecha.substring( 0, req.body.fecha.indexOf('T') );
+    var fecha = req.body.fecha.substring(0, req.body.fecha);
+
 	
-	var sql="SELECT "+ 
-		"	DATE_FORMAT(insert_date, '%Y-%m-%d') AS d, "+
-		"	AVG(price) as p1 "+
-		"FROM youtube.renfe "+
+    var sql = "SELECT " +
+    "DIA_TRANSPORTE, " +
+    "DIA_SEMANA, " +
+    "NOMBRE_EMPRESA, " +
+    "LINEA, " +
+    "AMBA, " +
+    "TIPO_TRANSPORTE, " +
+    "JURISDICCION, " +
+    "PROVINCIA, " +
+    "MUNICIPIO, " +
+    "CANTIDAD " +
+    "FROM youtube.renfe " +
+    "GROUP BY DIA_TRANSPORTE, DIA_SEMANA, NOMBRE_EMPRESA, LINEA, AMBA, TIPO_TRANSPORTE, JURISDICCION, PROVINCIA, MUNICIPIO, CANTIDAD " +
+    "HAVING CANTIDAD > 1000 " +
+    "ORDER BY CANTIDAD DESC";
 
-		"WHERE start_date >= '"+fecha+" 00:00:00' AND start_date <= '"+fecha+" 23:59:59' AND "+
-		"	origin='BARCELONA' AND "+
-		"	destination='MADRID' AND "+
-		"	price<>'' "+
-		"GROUP BY DATE_FORMAT(insert_date, '%Y-%m-%d') "+
-		"ORDER BY insert_date DESC";
 
-	connection.query(sql, function(err, rows, fields) {
-		
-		var datos={
-			labels: [],
-			datasets: [
-				{
-					label: 'Media',
-					data: [],
-					fill: false,
-					backgroundColor: '#2f4860',
-					borderColor: '#2f4860'
-				}
-				]
-			};
+    connection.query(sql, function (err, rows, fields) {
+        var datos = {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Media',
+                    data: [],
+                    fill: false,
+                    backgroundColor: '#2f4860',
+                    borderColor: '#2f4860'
+                }
+            ]
+        };
 
-		for ( var i=0; i<rows.length; i++ ) {
-			datos.labels.push( rows[i].d );
-			datos.datasets[0].data.push( rows[i].p1 );
-			}
+        for (var i = 0; i < rows.length; i++) {
+            datos.labels.push(rows[i].DIA_TRANSPORTE);
+            datos.datasets[0].data.push(rows[i].CANTIDAD);
+        }
 
-  		res.send( datos );
-		});	
-	});
-
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+        res.send(datos);
+    });
 });
+
+
+app.listen(3006, function () {
+    console.log('Example app listening on port 3000!');
+  });
