@@ -1,5 +1,5 @@
 
-var rURL="/datosoficiales2022_trej.csv";
+var rURL="/datosoficiales2022_trenes.csv";
 
 var app = new Vue({
 	el: "#app",

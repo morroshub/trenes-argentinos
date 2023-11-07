@@ -1,13 +1,24 @@
 var express = require('express');
-var mysql = require('mysql');
+const mysql      = require('mysql');
 
 var connection = mysql.createConnection({
   host     : '127.0.0.1',
   user     : 'root',
-  password : ''
+  password : '',
+  database : 'Trenes_Argentinos'
 });
 
-connection.connect();
+connection.connect(function(err) {
+  if (err) {
+    console.error('error connecting: ' + err);
+    return;
+  }
+
+ console.log('connected as id ' + connection.threadId);
+});
+
+
+
 
 var app = express();
 app.use(express.json());
@@ -58,6 +69,6 @@ app.post('/data', function (req, res) {
 });
 
 
-app.listen(3006, function () {
-    console.log('Example app listening on port 3000!');
+app.listen(3030, function () {
+    console.log('Example app listening on port 3030!');
   });
